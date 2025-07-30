@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Menu - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav style="background: #343a40; color: white; padding: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; display: inline;">Manage Menu</h1>
+                <div style="display: inline-block; margin-left: 30px;">
+                    <a href="/admin" style="color: white; text-decoration: none; background: #6c757d; padding: 8px 15px; border-radius: 4px; margin-right: 10px;">📊 Orders</a>
+                    <a href="/admin/menu" style="color: white; text-decoration: none; background: #007bff; padding: 8px 15px; border-radius: 4px; margin-right: 10px;">🍽️ Menu</a>
+                    <a href="/admin/addons" style="color: white; text-decoration: none; background: #6c757d; padding: 8px 15px; border-radius: 4px;">🥢 Addons</a>
+                </div>
+            </div>
+            <div>
+                <a href="/admin/logout" style="color: white; text-decoration: none; background: #dc3545; padding: 8px 15px; border-radius: 4px;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div style="padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Menu Items</h2>
+            <button onclick="showAddForm()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Add New Menu Item</button>
+        </div>
+
+        <!-- Add Menu Item Form Modal -->
+        <div id="add-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%;">
+                <h3>Add New Menu Item</h3>
+                <form id="add-item-form">
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" id="item-name" placeholder="Item Name (e.g., Nasi Goreng)" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <textarea id="item-description" placeholder="Description" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; height: 80px; resize: vertical;"></textarea>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <input type="number" id="item-price" placeholder="Price" step="0.01" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <input type="url" id="item-image" placeholder="Image URL" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <select id="item-category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">Select Category</option>
+                            <option value="main">Main Course</option>
+                            <option value="appetizer">Appetizer</option>
+                            <option value="drink">Drink</option>
+                            <option value="dessert">Dessert</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="item-available" checked style="margin-right: 10px;">
+                            Available
+                        </label>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <button type="button" onclick="hideAddForm()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Cancel</button>
+                        <button type="submit" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Add Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Menu Item Form Modal -->
+        <div id="edit-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%;">
+                <h3>Edit Menu Item</h3>
+                <form id="edit-item-form">
+                    <input type="hidden" id="edit-item-id">
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" id="edit-item-name" placeholder="Item Name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <textarea id="edit-item-description" placeholder="Description" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; height: 80px; resize: vertical;"></textarea>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <input type="number" id="edit-item-price" placeholder="Price" step="0.01" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <input type="url" id="edit-item-image" placeholder="Image URL" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <select id="edit-item-category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">Select Category</option>
+                            <option value="main">Main Course</option>
+                            <option value="appetizer">Appetizer</option>
+                            <option value="drink">Drink</option>
+                            <option value="dessert">Dessert</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="edit-item-available" style="margin-right: 10px;">
+                            Available
+                        </label>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <button type="button" onclick="hideEditForm()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Cancel</button>
+                        <button type="submit" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Update Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if error %}
+            <p style="color: red;">Error: {{ error }}</p>
+        {% endif %}
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0;">💡 About Menu Management</h4>
+            <p style="margin: 0; color: #6c757d;">Manage your restaurant's menu items here. You can add, edit, disable, or delete items. Disabled items won't show up for customers but will remain in your database.</p>
+        </div>
+
+        {% if items %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+            {% for item in items %}
+            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 5px 0;">{{ item.name }}</h3>
+                        <span style="background: #e9ecef; color: #6c757d; padding: 2px 6px; border-radius: 10px; font-size: 11px; text-transform: uppercase;">
+                            {{ item.category }}
+                        </span>
+                    </div>
+                    <span style="background: {{ '#28a745' if item.available else '#dc3545' }}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px;">
+                        {{ 'Available' if item.available else 'Unavailable' }}
+                    </span>
+                </div>
+                
+                {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="{{ item.name }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 10px;">
+                {% endif %}
+                
+                <p style="color: #6c757d; margin: 10px 0; font-size: 14px; line-height: 1.4;">{{ item.description }}</p>
+                <p style="margin: 10px 0;"><strong style="font-size: 18px; color: #28a745;">Rp {{ item.price }}</strong></p>
+                
+                <div style="margin-top: 15px; display: flex; gap: 5px; flex-wrap: wrap;">
+                    <button onclick="editItem('{{ item.id }}', '{{ item.name }}', '{{ item.description }}', {{ item.price }}, '{{ item.image_url }}', '{{ item.category }}', {{ 'true' if item.available else 'false' }})" 
+                            style="background: #ffc107; color: black; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px;">
+                        Edit
+                    </button>
+                    <button onclick="toggleItemAvailability('{{ item.id }}')" 
+                            style="background: {{ '#6c757d' if item.available else '#28a745' }}; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px;">
+                        {{ 'Disable' if item.available else 'Enable' }}
+                    </button>
+                    <button onclick="deleteItem('{{ item.id }}', '{{ item.name }}')" 
+                            style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px;">
+                        Delete
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: #6c757d;">
+            <h3>No menu items found</h3>
+            <p>Add your first menu item to get started.</p>
+        </div>
+        {% endif %}
+    </div>
+<script src="{{ url_for('static', filename='js/admin_menu.js') }}"></script>
+</body>
+</html>

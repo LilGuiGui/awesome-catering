@@ -1,0 +1,741 @@
+{% extends "base.html" %}
+
+{% block title %}Order Success - Catering Service{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <!-- Success Header -->
+    <div class="success-header">
+        <div class="success-animation">
+            <div class="success-icon">✅</div>
+        </div>
+        <h1 class="success-title">Order Confirmed!</h1>
+        <p class="success-subtitle">Thank you for choosing our catering service</p>
+    </div>
+
+    <!-- Order ID Display -->
+    <div class="order-id-display">
+        <h3 class="order-id-label">Your Order ID</h3>
+        <h2 class="order-id-number">
+            {% if order and order.order_id %}
+                {{ order.order_id }}
+            {% else %}
+                Processing...
+            {% endif %}
+        </h2>
+        <p class="order-id-note">Please save this ID for tracking your order</p>
+    </div>
+
+    <!-- Processing Notice -->
+    {% if order and order.get('status') != 'paid' %}
+    <div class="processing-notice">
+        <div class="notice-icon">ℹ️</div>
+        <div class="notice-content">
+            <strong>Order Processing:</strong> Your order details are being processed. 
+            You can track your order status using the ID above.
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Order Details Card -->
+    <div class="order-details-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <span class="card-icon">📋</span>
+                Order Details
+            </h3>
+        </div>
+
+        <div class="card-body">
+            <!-- Customer Information -->
+            <div class="detail-section">
+                <h4 class="detail-section-title">Customer Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value">
+                            {% if order and order.customer and order.customer.name %}
+                                {{ order.customer.name }}
+                            {% else %}
+                                Processing...
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Phone:</span>
+                        <span class="detail-value">
+                            {% if order and order.customer and order.customer.phone %}
+                                {{ order.customer.phone }}
+                            {% else %}
+                                Processing...
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if order and order.customer and order.customer.get('notes') %}
+                    <div class="detail-item full-width">
+                        <span class="detail-label">Special Notes:</span>
+                        <span class="detail-value">{{ order.customer.notes }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="detail-section">
+                <h4 class="detail-section-title">Items Ordered</h4>
+                <div class="items-container">
+                    {% if order and order.get('items') and order.get('items')|length > 0 %}
+                        {% for item in order.get('items') %}
+                        <div class="order-item">
+                            <div class="item-info">
+                                <span class="item-name">
+                                    {% if item.get('name') %}
+                                        {{ item.get('name') }}
+                                    {% else %}
+                                        Item
+                                    {% endif %}
+                                </span>
+                                <span class="item-quantity">Qty: {{ item.get('quantity', 1) }}</span>
+                            </div>
+                            <div class="item-pricing">
+                                {% if item.get('price') and item.get('quantity') and item.get('total') %}
+                                    <span class="item-unit-price">Rp {{ item.get('price') }}</span>
+                                    <span class="item-total">Rp {{ item.get('total') }}</span>
+                                {% elif item.get('price') and item.get('quantity') %}
+                                    <span class="item-unit-price">Rp {{ item.get('price') }}</span>
+                                    <span class="item-total">Rp {{ "%.2f"|format(item.get('price') * item.get('quantity')) }}</span>
+                                {% else %}
+                                    <span class="item-total">Processing...</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-items">
+                            <div class="empty-icon">📦</div>
+                            <p>Order items are being processed...</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Order Total -->
+            <div class="total-section">
+                <div class="total-row">
+                    <span class="total-label">Order Total:</span>
+                    <span class="total-amount">
+                        {% if order and order.total %}
+                            Rp {{ order.total }}
+                        {% else %}
+                            Processing...
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- What's Next Section -->
+    <div class="next-steps-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <span class="card-icon">🚀</span>
+                What's Next?
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="steps-list">
+                <div class="step-item completed">
+                    <div class="step-icon">✅</div>
+                    <div class="step-content">
+                        <h4 class="step-title">Payment Confirmed</h4>
+                        <p class="step-description">Your payment has been successfully processed</p>
+                    </div>
+                </div>
+                <div class="step-item active">
+                    <div class="step-icon">👨‍🍳</div>
+                    <div class="step-content">
+                        <h4 class="step-title">Order Being Prepared</h4>
+                        <p class="step-description">Our kitchen team is now preparing your delicious meal</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-icon">📞</div>
+                    <div class="step-content">
+                        <h4 class="step-title">Ready for Pickup</h4>
+                        <p class="step-description">We'll contact you when your order is ready</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-icon">📱</div>
+                    <div class="step-content">
+                        <h4 class="step-title">Track Anytime</h4>
+                        <p class="step-description">Monitor your order status in real-time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        {% if order and order.order_id %}
+        <a href="/track?order_id={{ order.order_id }}" class="btn btn-primary btn-large">
+            <span class="btn-icon">🔍</span>
+            Track Order Status
+        </a>
+        {% else %}
+        <a href="/track" class="btn btn-primary btn-large">
+            <span class="btn-icon">🔍</span>
+            Track Order Status
+        </a>
+        {% endif %}
+        
+        <div class="secondary-actions">
+            <a href="/menu" class="secondary-link">
+                <span class="link-icon">🍽️</span>
+                Order More Items
+            </a>
+            <span class="link-separator">|</span>
+            <a href="/" class="secondary-link">
+                <span class="link-icon">🏠</span>
+                Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-save order for tracking
+window.addEventListener('load', function() {
+    {% if order and order.order_id %}
+    const orderData = {
+        order_id: '{{ order.order_id }}',
+        customer_phone: '{{ order.customer.phone if order.customer and order.customer.phone else "" }}',
+        expiry: new Date().getTime() + (24 * 60 * 60 * 1000)
+    };
+    
+    // Save to session via API
+    fetch('/api/save-order-to-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: '{{ order.order_id }}' })
+    }).catch(error => console.log('Session save failed:', error));
+    {% endif %}
+});
+</script>
+
+<style>
+/* Order Success Page Styles - MinimalsUI Theme */
+
+.success-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+/* Success Header */
+.success-header {
+    text-align: center;
+    margin-bottom: var(--spacing-3xl);
+    padding: var(--spacing-3xl) var(--spacing-xl);
+    background: var(--gradient-success);
+    border-radius: var(--radius-xl);
+    color: var(--grey-0);
+    position: relative;
+    overflow: hidden;
+}
+
+.success-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="success-grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23success-grain)"/></svg>');
+    pointer-events: none;
+}
+
+.success-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+.success-animation {
+    margin-bottom: var(--spacing-lg);
+}
+
+.success-icon {
+    font-size: 4rem;
+    display: inline-block;
+    animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.success-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: var(--spacing-md);
+    font-family: var(--font-secondary);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.success-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    font-weight: 400;
+    margin: 0;
+}
+
+/* Order ID Display */
+.order-id-display {
+    background: var(--grey-0);
+    border: 2px solid var(--primary-light);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-3xl);
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-card);
+    position: relative;
+}
+
+.order-id-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--grey-600);
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.order-id-number {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-main);
+    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-lg);
+    background: var(--grey-100);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--grey-200);
+    letter-spacing: 2px;
+}
+
+.order-id-note {
+    font-size: 0.875rem;
+    color: var(--grey-600);
+    margin: 0;
+    font-style: italic;
+}
+
+/* Processing Notice */
+.processing-notice {
+    background: #E6F7FF;
+    border: 1px solid #91D5FF;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    color: #003A8C;
+}
+
+.notice-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.notice-content {
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+/* Cards */
+.order-details-card, .next-steps-card {
+    background: var(--grey-0);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--grey-200);
+    margin-bottom: var(--spacing-xl);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
+    border-bottom: 1px solid var(--grey-200);
+    background: var(--grey-50);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--grey-800);
+    margin: 0;
+    font-family: var(--font-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.card-icon {
+    font-size: 1.25rem;
+}
+
+.card-body {
+    padding: var(--spacing-xl);
+}
+
+/* Detail Sections */
+.detail-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.detail-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--grey-800);
+    margin-bottom: var(--spacing-lg);
+    font-family: var(--font-secondary);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--grey-100);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--grey-200);
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--grey-700);
+    font-size: 0.875rem;
+}
+
+.detail-value {
+    font-weight: 500;
+    color: var(--grey-800);
+    font-size: 0.875rem;
+}
+
+/* Order Items */
+.items-container {
+    background: var(--grey-50);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--grey-200);
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--grey-200);
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.item-name {
+    font-weight: 600;
+    color: var(--grey-800);
+    font-size: 0.875rem;
+}
+
+.item-quantity {
+    font-size: 0.75rem;
+    color: var(--grey-600);
+    font-weight: 500;
+}
+
+.item-pricing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-xs);
+}
+
+.item-unit-price {
+    font-size: 0.75rem;
+    color: var(--grey-600);
+}
+
+.item-total {
+    font-weight: 700;
+    color: var(--primary-main);
+    font-size: 0.875rem;
+}
+
+.empty-items {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--grey-600);
+}
+
+.empty-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Total Section */
+.total-section {
+    background: var(--grey-100);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--primary-light);
+    margin-top: var(--spacing-lg);
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-label {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--grey-800);
+    font-family: var(--font-secondary);
+}
+
+.total-amount {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-main);
+    font-family: var(--font-secondary);
+}
+
+/* Steps List */
+.steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--grey-200);
+    transition: all 0.3s ease;
+}
+
+.step-item.completed {
+    background: #F6FFED;
+    border-color: var(--success-light);
+}
+
+.step-item.active {
+    background: #E6F7FF;
+    border-color: #91D5FF;
+    transform: scale(1.02);
+}
+
+.step-item .step-icon {
+    font-size: 1.5rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--grey-200);
+    flex-shrink: 0;
+}
+
+.step-item.completed .step-icon {
+    background: var(--success-light);
+}
+
+.step-item.active .step-icon {
+    background: #91D5FF;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--grey-800);
+    margin-bottom: var(--spacing-xs);
+    font-family: var(--font-secondary);
+}
+
+.step-description {
+    font-size: 0.875rem;
+    color: var(--grey-600);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Action Buttons */
+.action-buttons {
+    text-align: center;
+    margin-top: var(--spacing-3xl);
+}
+
+.btn-large {
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    font-size: 1rem;
+    min-height: 56px;
+    margin-bottom: var(--spacing-xl);
+}
+
+.secondary-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.secondary-link {
+    color: var(--primary-main);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    transition: color 0.2s ease;
+}
+
+.secondary-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.link-icon {
+    font-size: 1rem;
+}
+
+.link-separator {
+    color: var(--grey-400);
+    font-weight: 300;
+}
+
+/* Animations */
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .success-container {
+        padding: var(--spacing-lg);
+    }
+
+    .success-title {
+        font-size: 2rem;
+    }
+
+    .order-id-number {
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-header, .card-body {
+        padding: var(--spacing-lg);
+    }
+
+    .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    .item-pricing {
+        align-items: flex-start;
+    }
+
+    .total-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .step-item {
+        padding: var(--spacing-md);
+    }
+
+    .secondary-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .link-separator {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .success-header {
+        padding: var(--spacing-xl);
+    }
+
+    .success-icon {
+        font-size: 3rem;
+    }
+
+    .order-id-display {
+        padding: var(--spacing-xl);
+    }
+
+    .order-id-number {
+        font-size: 1.75rem;
+    }
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,610 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - Catering Service{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <!-- Page Header -->
+    <div class="checkout-header">
+        <div class="breadcrumb">
+            <a href="/" class="breadcrumb-link">Home</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="/menu" class="breadcrumb-link">Menu</a>
+            <span class="breadcrumb-separator">→</span>
+            <span class="breadcrumb-current">Checkout</span>
+        </div>
+        <h1 class="checkout-title">Complete Your Order</h1>
+        <p class="checkout-subtitle">Review your items and provide delivery details</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="checkout-progress">
+        <div class="progress-step active">
+            <div class="step-icon">🛒</div>
+            <span class="step-label">Cart</span>
+        </div>
+        <div class="progress-line active"></div>
+        <div class="progress-step active">
+            <div class="step-icon">📝</div>
+            <span class="step-label">Details</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step">
+            <div class="step-icon">💳</div>
+            <span class="step-label">Payment</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step">
+            <div class="step-icon">✅</div>
+            <span class="step-label">Complete</span>
+        </div>
+    </div>
+
+    <!-- Main Checkout Grid -->
+    <div class="checkout-grid">
+        <!-- Order Summary Section -->
+        <div class="checkout-section order-summary">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="section-icon">📋</span>
+                    Order Summary
+                </h3>
+            </div>
+
+            <!-- Main Items -->
+            <div class="order-section">
+                <h4 class="subsection-title">Main Items</h4>
+                <div id="cart-items-display" class="items-list">
+                    <!-- Cart items will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Add-ons -->
+            <div class="order-section">
+                <h4 class="subsection-title">Add-ons</h4>
+                <div id="addons-display" class="addons-list">
+                    <!-- Add-ons will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Totals -->
+            <div class="totals-section">
+                <div id="totals-breakdown">
+                    <!-- Totals will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Information Section -->
+        <div class="checkout-section customer-info">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="section-icon">👤</span>
+                    Customer Information
+                </h3>
+            </div>
+
+            <form id="checkout-form" class="checkout-form">
+                <!-- Personal Details -->
+                <div class="form-section">
+                    <h4 class="form-section-title">Personal Details</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="name">
+                            Full Name <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name"
+                            class="form-control" 
+                            placeholder="Enter your full name" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="phone">
+                            Phone Number <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone"
+                            class="form-control" 
+                            placeholder="+62 812-3456-7890" 
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Special Instructions -->
+                <div class="form-section">
+                    <h4 class="form-section-title">Special Instructions</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="notes">
+                            Notes for Kitchen
+                        </label>
+                        <textarea 
+                            id="notes" 
+                            name="notes"
+                            class="form-control" 
+                            placeholder="Any special requests, dietary restrictions, or cooking preferences..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <a href="/menu" class="btn btn-secondary btn-back">
+                        <span class="btn-icon">←</span>
+                        Back to Menu
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-submit">
+                        <span class="btn-icon">💳</span>
+                        Proceed to Payment
+                        <div class="btn-loading hidden">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Notice -->
+    <div class="security-notice">
+        <div class="security-icon">🔒</div>
+        <div class="security-content">
+            <h4 class="security-title">Secure Checkout</h4>
+            <p class="security-text">Your information is protected with 256-bit SSL encryption</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="Mid-client-VBCau5iMI5VdsY0Y"></script>
+
+<script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+
+<style>
+/* Checkout-specific styles following MinimalsUI principles */
+
+.checkout-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+/* Header */
+.checkout-header {
+    text-align: center;
+    margin-bottom: var(--spacing-3xl);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    font-size: 0.875rem;
+}
+
+.breadcrumb-link {
+    color: var(--grey-600);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+    color: var(--primary-main);
+}
+
+.breadcrumb-separator {
+    color: var(--grey-400);
+}
+
+.breadcrumb-current {
+    color: var(--primary-main);
+    font-weight: 600;
+}
+
+.checkout-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--grey-800);
+    margin-bottom: var(--spacing-md);
+    font-family: var(--font-secondary);
+}
+
+.checkout-subtitle {
+    font-size: 1.125rem;
+    color: var(--grey-600);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Progress Bar */
+.checkout-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-3xl);
+    padding: var(--spacing-xl) 0;
+    background: var(--grey-0);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--grey-200);
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    position: relative;
+}
+
+.step-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--grey-300);
+    color: var(--grey-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.progress-step.active .step-icon {
+    background: var(--gradient-primary);
+    color: var(--grey-0);
+    box-shadow: var(--shadow-card);
+}
+
+.step-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--grey-500);
+    transition: color 0.3s ease;
+}
+
+.progress-step.active .step-label {
+    color: var(--primary-main);
+}
+
+.progress-line {
+    width: 80px;
+    height: 2px;
+    background: var(--grey-300);
+    margin: 0 var(--spacing-md);
+    transition: background 0.3s ease;
+}
+
+.progress-line.active {
+    background: var(--primary-main);
+}
+
+/* Main Grid */
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-3xl);
+    margin-bottom: var(--spacing-3xl);
+}
+
+.checkout-section {
+    background: var(--grey-0);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--grey-200);
+    height: fit-content;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--grey-200);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--grey-800);
+    font-family: var(--font-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin: 0;
+}
+
+.section-icon {
+    font-size: 1.25rem;
+}
+
+/* Order Summary */
+.order-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.order-section:last-child {
+    margin-bottom: 0;
+}
+
+.subsection-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--grey-700);
+    margin-bottom: var(--spacing-md);
+    font-family: var(--font-secondary);
+}
+
+.items-list, .addons-list {
+    background: var(--grey-50);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--grey-200);
+    min-height: 60px;
+}
+
+/* Totals */
+.totals-section {
+    background: var(--grey-100);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--primary-light);
+}
+
+/* Form Styles */
+.checkout-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.form-section {
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--grey-200);
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.form-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--grey-800);
+    margin-bottom: var(--spacing-lg);
+    font-family: var(--font-secondary);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--grey-700);
+    margin-bottom: var(--spacing-xs);
+}
+
+.required {
+    color: var(--error-main);
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 1px solid var(--grey-300);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-family: var(--font-primary);
+    transition: all 0.2s ease;
+    background: var(--grey-0);
+    color: var(--grey-800);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 3px rgba(0, 167, 111, 0.08);
+}
+
+.form-control::placeholder {
+    color: var(--grey-500);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--font-primary);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: var(--spacing-lg);
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-xl);
+    border-top: 2px solid var(--grey-200);
+}
+
+.btn-back {
+    background: var(--grey-0);
+    color: var(--grey-700);
+    border: 1px solid var(--grey-300);
+    text-decoration: none;
+}
+
+.btn-back:hover {
+    background: var(--grey-100);
+    border-color: var(--grey-400);
+    text-decoration: none;
+    color: var(--grey-700);
+}
+
+.btn-submit {
+    background: var(--gradient-primary);
+    color: var(--grey-0);
+    position: relative;
+    min-width: 200px;
+}
+
+.btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-dialog);
+}
+
+.btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-loading {
+    position: absolute;
+    right: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid var(--grey-0);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Security Notice */
+.security-notice {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    background: var(--grey-100);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--grey-200);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.security-icon {
+    font-size: 2rem;
+    color: var(--success-main);
+}
+
+.security-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--grey-800);
+    margin-bottom: var(--spacing-xs);
+    font-family: var(--font-secondary);
+}
+
+.security-text {
+    font-size: 0.875rem;
+    color: var(--grey-600);
+    margin: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+    .checkout-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .checkout-progress {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .progress-line {
+        width: 60px;
+    }
+}
+
+@media (max-width: 768px) {
+    .checkout-container {
+        padding: var(--spacing-lg);
+    }
+
+    .checkout-title {
+        font-size: 2rem;
+    }
+
+    .checkout-progress {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+
+    .progress-line {
+        display: none;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .btn-back, .btn-submit {
+        width: 100%;
+    }
+
+    .security-notice {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .checkout-section {
+        padding: var(--spacing-lg);
+    }
+
+    .breadcrumb {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Utilities */
+.hidden {
+    display: none;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+{% endblock %}

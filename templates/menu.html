@@ -1,0 +1,840 @@
+{% extends "base.html" %}
+
+{% block title %}Menu - Catering Service{% endblock %}
+
+{% block content %}
+<div class="menu-page">
+    <!-- #Page Header: Clear page title with breadcrumb -->
+    <section class="page-header">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" class="breadcrumb-link">Home</a>
+                <span class="breadcrumb-separator">→</span>
+                <span class="breadcrumb-current">Menu</span>
+            </div>
+            <h1 class="page-title">Our Delicious Menu</h1>
+            <p class="page-subtitle">Discover our carefully crafted dishes made with fresh ingredients</p>
+        </div>
+    </section>
+
+    <!-- #Filter Section: Category filtering with modern tabs -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-category="all">
+                    <span class="tab-icon">🍽️</span>
+                    Semua
+                </button>
+                <button class="filter-tab" data-category="main">
+                    <span class="tab-icon">🍖</span>
+                    Daging
+                </button>
+                <button class="filter-tab" data-category="appetizer">
+                    <span class="tab-icon">🥗</span>
+                    Sayuran
+                </button>
+                <button class="filter-tab" data-category="drink">
+                    <span class="tab-icon">🥤</span>
+                    Minuman
+                </button>
+                <button class="filter-tab" data-category="dessert">
+                    <span class="tab-icon">🍰</span>
+                    Tambahan
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- #Menu Content: Grid layout with enhanced cards -->
+    <section class="menu-content">
+        <div class="container">
+            {% if error %}
+                <!-- #Error State: User-friendly error message -->
+                <div class="error-state">
+                    <div class="error-icon">😔</div>
+                    <h3 class="error-title">Unable to Load Menu</h3>
+                    <p class="error-message">{{ error }}</p>
+                    <button onclick="location.reload()" class="btn btn-primary">
+                        <span class="btn-icon">🔄</span>
+                        Try Again
+                    </button>
+                </div>
+            {% else %}
+                <!-- #Menu Grid: Responsive card layout -->
+                <div class="menu-grid" id="menu-grid">
+                    {% for item in items %}
+                    <div class="menu-card" data-category="{{ item.category }}" data-available="{{ item.available }}">
+                        <!-- #Card Image: High-quality food imagery -->
+                        <div class="card-image">
+                            <img src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy">
+                            <!-- #Availability Badge (only when sold out) -->
+                            {% if not item.available %}
+                            <div class="unavailable-badge">Sold Out</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- #Card Content: Typography hierarchy -->
+                        <div class="card-content">
+                            <h3 class="card-title">{{ item.name }}</h3>
+                            <p class="card-description">{{ item.description }}</p>
+                            
+                            <!-- #Pricing: Prominent price display -->
+                            <div class="card-footer">
+                                <div class="price-section">
+                                    <span class="price">Rp{{ "{:,}".format(item.price).replace(',', '.') }}</span>
+                                </div>
+                                
+                                <!-- #Action Button: Add to cart functionality -->
+                                {% if item.available %}
+                                <button 
+                                    onclick="addToCart('{{ item.id }}', '{{ item.name }}', {{ item.price }})" 
+                                    class="btn btn-add-cart">
+                                    <span class="btn-icon">🛒</span>
+                                    Add to Cart
+                                </button>
+                                {% else %}
+                                <button class="btn btn-unavailable" disabled>
+                                    <span class="btn-icon">❌</span>
+                                    Unavailable
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- #Empty State: When no items match filter -->
+                <div class="empty-state" id="empty-state" style="display: none;">
+                    <div class="empty-icon">🔍</div>
+                    <h3 class="empty-title">No Items Found</h3>
+                    <p class="empty-message">Try selecting a different category</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- #Quick Order CTA: Floating action for quick access -->
+    <div class="quick-order-fab">
+        <button onclick="showCart()" class="fab-button">
+            <span class="fab-icon">🛒</span>
+            <span class="fab-count" id="fab-cart-count">0</span>
+        </button>
+    </div>
+</div>
+
+<style>
+    /* #Menu Page Specific Styles: Following MinimalsUI principles */
+    
+    .menu-page {
+        min-height: 100vh;
+        background: var(--grey-50);
+        padding-top: 80px; /* Account for fixed navbar */
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--grey-0) 0%, var(--grey-100) 100%);
+        padding: var(--spacing-3xl) 0 var(--spacing-2xl);
+        border-bottom: 1px solid var(--grey-200);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(0,167,111,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+        pointer-events: none;
+    }
+
+    .page-header > .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        font-size: 0.875rem;
+    }
+
+    .breadcrumb-link {
+        color: var(--grey-600);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+    }
+
+    .breadcrumb-link:hover {
+        color: var(--primary-main);
+        background: var(--grey-100);
+    }
+
+    .breadcrumb-separator {
+        color: var(--grey-400);
+        font-weight: 400;
+    }
+
+    .breadcrumb-current {
+        color: var(--grey-800);
+        font-weight: 600;
+    }
+
+    .page-title {
+        font-size: clamp(2.25rem, 5vw, 3.5rem);
+        font-weight: 800;
+        color: var(--grey-800);
+        margin-bottom: var(--spacing-md);
+        font-family: var(--font-secondary);
+        line-height: 1.2;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        font-size: 1.25rem;
+        color: var(--grey-600);
+        margin: 0;
+        max-width: 600px;
+        line-height: 1.6;
+        font-weight: 400;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        padding: var(--spacing-xl) 0;
+        border-bottom: 1px solid var(--grey-200);
+        position: sticky;
+        top: 60px; /* Account for navbar height */
+        z-index: 100;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: var(--spacing-sm);
+        justify-content: center;
+        flex-wrap: wrap;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .filter-tab {
+        background: var(--grey-100);
+        color: var(--grey-700);
+        border: 2px solid transparent;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--radius-xl);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-family: var(--font-primary);
+        position: relative;
+        overflow: hidden;
+        min-width: 120px;
+        justify-content: center;
+    }
+
+    .filter-tab::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--gradient-primary);
+        transition: left 0.3s ease;
+        z-index: -1;
+    }
+
+    .filter-tab:hover {
+        color: var(--grey-0);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-card);
+        border-color: var(--primary-main);
+    }
+
+    .filter-tab:hover::before {
+        left: 0;
+    }
+
+    .filter-tab.active {
+        background: var(--gradient-primary);
+        color: var(--grey-0);
+        box-shadow: var(--shadow-card);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+
+    .filter-tab.active::before {
+        left: 0;
+    }
+
+    .tab-icon {
+        font-size: 1.125rem;
+    }
+
+    /* Menu Content */
+    .menu-content {
+        padding: var(--spacing-3xl) 0;
+    }
+
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-lg);
+    }
+
+    .menu-card {
+        background: var(--grey-0);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-card);
+        border: 1px solid var(--grey-200);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        transform-origin: center;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-dialog);
+        border-color: var(--primary-light);
+    }
+
+    .menu-card[data-available="False"] {
+        opacity: 0.75;
+    }
+
+    .menu-card[data-available="False"]:hover {
+        transform: translateY(-4px) scale(1.01);
+    }
+
+    /* Card Image */
+    .card-image {
+        position: relative;
+        height: 260px;
+        overflow: hidden;
+        background: var(--grey-100);
+    }
+
+    .card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu-card:hover .card-image img {
+        transform: scale(1.08);
+    }
+
+    .unavailable-badge {
+        position: absolute;
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        background: var(--error-main);
+        color: var(--grey-0);
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: var(--radius-xl);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-card);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Card Content */
+    .card-content {
+        padding: var(--spacing-xl);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--grey-800);
+        margin-bottom: var(--spacing-md);
+        font-family: var(--font-secondary);
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-description {
+        color: var(--grey-600);
+        margin-bottom: var(--spacing-xl);
+        line-height: 1.6;
+        font-size: 0.875rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 63px; /* Ensure consistent height */
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-top: auto;
+    }
+
+    .price-section {
+        flex: 1;
+    }
+
+    .price {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--primary-main);
+        font-family: var(--font-secondary);
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+    }
+
+    /* Action Buttons */
+    .btn-add-cart {
+        background: var(--gradient-success);
+        color: var(--grey-0);
+        border: none;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        white-space: nowrap;
+        box-shadow: var(--shadow-card);
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-add-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-dialog);
+        background: linear-gradient(135deg, #6ee392 0%, #16a34a 100%);
+    }
+
+    .btn-unavailable {
+        background: var(--grey-400);
+        color: var(--grey-0);
+        border: none;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: not-allowed;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        white-space: nowrap;
+        min-width: 140px;
+        justify-content: center;
+        opacity: 0.8;
+    }
+
+    /* Error State */
+    .error-state {
+        text-align: center;
+        padding: var(--spacing-3xl);
+        background: var(--grey-0);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-card);
+        border: 1px solid var(--grey-200);
+        max-width: 500px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .error-icon {
+        font-size: 4rem;
+        margin-bottom: var(--spacing-lg);
+        opacity: 0.7;
+    }
+
+    .error-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--grey-800);
+        margin-bottom: var(--spacing-md);
+        font-family: var(--font-secondary);
+    }
+
+    .error-message {
+        color: var(--error-main);
+        margin-bottom: var(--spacing-xl);
+        font-size: 0.875rem;
+        background: #FFF2F1;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-sm);
+        border: 1px solid #FFD6CC;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-3xl);
+        background: var(--grey-0);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-card);
+        border: 1px solid var(--grey-200);
+        max-width: 500px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: var(--spacing-lg);
+        opacity: 0.5;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--grey-800);
+        margin-bottom: var(--spacing-md);
+        font-family: var(--font-secondary);
+    }
+
+    .empty-message {
+        color: var(--grey-600);
+        margin: 0;
+    }
+
+    /* Quick Order FAB */
+    .quick-order-fab {
+        position: fixed;
+        bottom: var(--spacing-xl);
+        right: var(--spacing-xl);
+        z-index: 1000;
+    }
+
+    .fab-button {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        color: var(--grey-0);
+        border: none;
+        cursor: pointer;
+        box-shadow: var(--shadow-dialog);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: visible;
+    }
+
+    .fab-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0px 20px 40px -4px rgba(145, 158, 171, 0.24);
+    }
+
+    .fab-icon {
+        font-size: 1.5rem;
+    }
+
+    .fab-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--error-main);
+        color: var(--grey-0);
+        font-size: 0.75rem;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-weight: 700;
+        min-width: 20px;
+        text-align: center;
+        border: 2px solid var(--grey-0);
+        display: none;
+    }
+
+    .fab-count.show {
+        display: block;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .menu-card {
+        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu-card:nth-child(2n) {
+        animation-delay: 0.1s;
+    }
+
+    .menu-card:nth-child(3n) {
+        animation-delay: 0.2s;
+    }
+
+    .menu-card:nth-child(4n) {
+        animation-delay: 0.3s;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .menu-page {
+            padding-top: 60px; /* Adjust for mobile navbar */
+        }
+
+        .page-header {
+            padding: var(--spacing-2xl) 0 var(--spacing-xl);
+        }
+
+        .page-title {
+            font-size: clamp(1.875rem, 6vw, 2.5rem);
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+        }
+
+        .filter-section {
+            top: 50px; /* Adjust for mobile navbar */
+            padding: var(--spacing-lg) 0;
+        }
+
+        .filter-tabs {
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding: 0 var(--spacing-lg);
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            max-width: none;
+            gap: var(--spacing-xs);
+        }
+
+        .filter-tab {
+            flex-shrink: 0;
+            scroll-snap-align: start;
+            min-width: 110px;
+            padding: var(--spacing-sm) var(--spacing-md);
+        }
+
+        .menu-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .card-image {
+            height: 220px;
+        }
+
+        .card-content {
+            padding: var(--spacing-lg);
+        }
+
+        .card-footer {
+            flex-direction: column;
+            align-items: stretch;
+            gap: var(--spacing-md);
+        }
+
+        .btn-add-cart, .btn-unavailable {
+            width: 100%;
+            justify-content: center;
+            min-width: unset;
+        }
+
+        .quick-order-fab {
+            bottom: var(--spacing-lg);
+            right: var(--spacing-lg);
+        }
+
+        .fab-button {
+            width: 56px;
+            height: 56px;
+        }
+
+        .fab-icon {
+            font-size: 1.25rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .menu-page {
+            padding-top: 80px;
+        }
+
+        .filter-section {
+            top: 45px;
+        }
+
+        .menu-grid {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+        }
+
+        .card-content {
+            padding: var(--spacing-md);
+        }
+
+        .page-header {
+            padding: var(--spacing-xl) 0 var(--spacing-lg);
+        }
+
+        .page-title {
+            font-size: clamp(1.5rem, 8vw, 2rem);
+        }
+
+        .breadcrumb {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .filter-tabs {
+            padding: 0 var(--spacing-md);
+        }
+
+        .filter-tab {
+            min-width: 120px;
+            padding: var(--spacing-sm);
+            font-size: 0.8125rem;
+        }
+
+        .tab-icon {
+            font-size: 1rem;
+        }
+    }
+
+    /* Very small screens */
+    @media (max-width: 360px) {
+        .menu-page {
+            padding-top: 70px; /* Account for wrapped navbar */
+        }
+
+        .filter-section {
+            top: 65px;
+        }
+    }
+</style>
+
+<script>
+    // #Filter Functionality: Category filtering with smooth animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const menuCards = document.querySelectorAll('.menu-card');
+        const emptyState = document.getElementById('empty-state');
+        const menuGrid = document.getElementById('menu-grid');
+
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const category = this.dataset.category;
+
+                // Update active tab
+                filterTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Filter cards with animation
+                let visibleCount = 0;
+                menuCards.forEach((card, index) => {
+                    const cardCategory = card.dataset.category;
+                    const shouldShow = category === 'all' || cardCategory === category;
+
+                    if (shouldShow) {
+                        card.style.display = 'block';
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Show/hide empty state
+                if (visibleCount === 0) {
+                    emptyState.style.display = 'block';
+                    menuGrid.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'none';
+                    menuGrid.style.display = 'grid';
+                }
+            });
+        });
+
+        // Update FAB cart count
+        function updateFabCount() {
+            const cartCount = document.getElementById('cart-count');
+            const fabCount = document.getElementById('fab-cart-count');
+            
+            if (cartCount && fabCount) {
+                const count = cartCount.textContent;
+                fabCount.textContent = count;
+                
+                if (parseInt(count) > 0) {
+                    fabCount.classList.add('show');
+                } else {
+                    fabCount.classList.remove('show');
+                }
+            }
+        }
+
+        // Watch for cart count changes
+        const cartCount = document.getElementById('cart-count');
+        if (cartCount) {
+            const observer = new MutationObserver(updateFabCount);
+            observer.observe(cartCount, { childList: true, subtree: true });
+        }
+        
+        // Initial update
+        updateFabCount();
+
+        // Smooth scrolling for filter changes
+        const filterSection = document.querySelector('.filter-section');
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                setTimeout(() => {
+                    const firstVisibleCard = document.querySelector('.menu-card[style*="display: block"], .menu-card:not([style*="display: none"])');
+                    if (firstVisibleCard) {
+                        const offset = filterSection.offsetHeight + 100;
+                        const elementPosition = firstVisibleCard.offsetTop;
+                        const offsetPosition = elementPosition - offset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 100);
+            });
+        });
+    });
+</script>
+{% endblock %}

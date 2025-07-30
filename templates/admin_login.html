@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Catering Service</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+    <div style="background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px;">
+        <h1 style="text-align: center; color: #343a40; margin-bottom: 30px;">Admin Login</h1>
+        
+        {% if error %}
+        <div style="color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="POST">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #343a40;">Username:</label>
+                <input type="text" name="username" required 
+                       style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; box-sizing: border-box;">
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #343a40;">Password:</label>
+                <input type="password" name="password" required 
+                       style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; box-sizing: border-box;">
+            </div>
+            
+            <button type="submit" 
+                    style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold;">
+                Login
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/" style="color: #007bff; text-decoration: none;">← Back to Main Site</a>
+        </div>
+    </div>
+</body>
+</html>

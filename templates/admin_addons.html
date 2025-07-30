@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Addons - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav style="background: #343a40; color: white; padding: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; display: inline;">Manage Addons</h1>
+                <div style="display: inline-block; margin-left: 30px;">
+                    <a href="/admin" style="color: white; text-decoration: none; background: #6c757d; padding: 8px 15px; border-radius: 4px; margin-right: 10px;">📊 Orders</a>
+                    <a href="/admin/menu" style="color: white; text-decoration: none; background: #6c757d; padding: 8px 15px; border-radius: 4px; margin-right: 10px;">🍽️ Menu</a>
+                    <a href="/admin/addons" style="color: white; text-decoration: none; background: #007bff; padding: 8px 15px; border-radius: 4px;">🥢 Addons</a>
+                </div>
+            </div>
+            <div>
+                <a href="/admin/logout" style="color: white; text-decoration: none; background: #dc3545; padding: 8px 15px; border-radius: 4px;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div style="padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Addon Items</h2>
+            <button onclick="showAddForm()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Add New Addon</button>
+        </div>
+
+        <!-- Add Addon Form Modal -->
+        <div id="add-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%;">
+                <h3>Add New Addon</h3>
+                <form id="add-addon-form">
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" id="addon-name" placeholder="Addon Name (e.g., Rice, Sambal)" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <input type="number" id="addon-price" placeholder="Price" step="0.01" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="addon-available" checked style="margin-right: 10px;">
+                            Available
+                        </label>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <button type="button" onclick="hideAddForm()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Cancel</button>
+                        <button type="submit" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Add Addon</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Addon Form Modal -->
+        <div id="edit-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%;">
+                <h3>Edit Addon</h3>
+                <form id="edit-addon-form">
+                    <input type="hidden" id="edit-addon-id">
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" id="edit-addon-name" placeholder="Addon Name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <input type="number" id="edit-addon-price" placeholder="Price" step="0.01" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="edit-addon-available" style="margin-right: 10px;">
+                            Available
+                        </label>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <button type="button" onclick="hideEditForm()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Cancel</button>
+                        <button type="submit" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Update Addon</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if error %}
+            <p style="color: red;">Error: {{ error }}</p>
+        {% endif %}
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0;">💡 About Addons</h4>
+            <p style="margin: 0; color: #6c757d;">Addons are items like rice, sambal, kerupuk that customers can add to their orders. Rice will be automatically added (quantity 1) when customers add their first main course item, but they can adjust the quantity or remove it.</p>
+        </div>
+
+        {% if addons %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            {% for addon in addons %}
+            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; flex: 1;">{{ addon.name }}</h3>
+                    <span style="background: {{ '#28a745' if addon.available else '#dc3545' }}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px;">
+                        {{ 'Available' if addon.available else 'Unavailable' }}
+                    </span>
+                </div>
+                <p><strong>Price: Rp {{ addon.price }}</strong></p>
+                
+                <div style="margin-top: 15px; display: flex; gap: 5px; flex-wrap: wrap;">
+                    <button onclick="editAddon('{{ addon.id }}', '{{ addon.name }}', {{ addon.price }}, {{ 'true' if addon.available else 'false' }})" 
+                            style="background: #ffc107; color: black; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px;">
+                        Edit
+                    </button>
+                    <button onclick="toggleAddonAvailability('{{ addon.id }}')" 
+                            style="background: {{ '#6c757d' if addon.available else '#28a745' }}; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px;">
+                        {{ 'Disable' if addon.available else 'Enable' }}
+                    </button>
+                    <button onclick="deleteAddon('{{ addon.id }}', '{{ addon.name }}')" 
+                            style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px;">
+                        Delete
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: #6c757d;">
+            <h3>No addons found</h3>
+            <p>Add your first addon to get started. Recommended addons: Rice, Sambal, Kerupuk, Extra Sauce</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin_addons.js') }}"></script>
+</body>
+</html>
