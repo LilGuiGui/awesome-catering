@@ -6,6 +6,34 @@ from services.cart import CartService
 api_bp = Blueprint('api', __name__)
 db_manager = DatabaseManager()
 
+@api_bp.route('/ping')
+def ping():
+    """Simple ping endpoint for health checks and keeping app alive"""
+    return jsonify({
+        'status': 'ok',
+        'timestamp': datetime.now().isoformat(),
+        'uptime': True
+    }), 200
+
+@api_bp.route('/health')
+def health():
+    """More detailed health check endpoint"""
+    try:
+        db_manager.get_menu_items()
+        db_status = 'ok'
+    except Exception as e:
+        db_status = f'error: {str(e)}'
+    
+    return jsonify({
+        'status': 'ok',
+        'timestamp': datetime.now().isoformat(),
+        'database': db_status,
+        'services': {
+            'cart': 'ok',
+            'session': 'ok' if 'session_key' in session else 'no_session'
+        }
+    }), 200
+
 @api_bp.route('/menu')
 def menu():
     try:
